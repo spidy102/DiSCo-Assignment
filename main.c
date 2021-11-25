@@ -3,9 +3,39 @@
 
 #include "visualiser.c"
 
+char **websites;
 int **mat;
 int rows = 0;
 int columns = 0;
+
+void copymat(int newmat[rows][columns])
+{
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < columns; j++) {
+			newmat[i][j] = mat[i][j];
+		}
+	}
+}
+
+void output(int mat[rows][columns])
+{
+	FILE *fp = fopen("Output.csv", "w");
+	for (int i = 0; i < rows; i++) {
+		fprintf(fp, ",%s", websites[i]);
+	}
+	fprintf(fp, "\n");
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < columns; j++) {
+			if (!j) {
+				fprintf(fp, "%s", websites[i]);
+			}
+			fprintf(fp, ",%d", mat[i][j]);
+		}
+		fprintf(fp, "\n");
+	}
+
+	fclose(fp);
+}
 
 void menu2(int choice)
 {
@@ -15,8 +45,12 @@ void menu2(int choice)
 	if (cont) {
 		// TODO
 		switch (choice) {
-		case 1:
-			plot("SampleInput.csv");
+		case 1: {
+			int newmat[rows][columns];
+			copymat(newmat);
+			output(newmat);
+			plot("Output.csv");
+		}
 		}
 	}
 }
@@ -198,6 +232,8 @@ void menu1()
 			}
 			break;
 		case 9:
+			free(websites);
+			free(mat);
 			return;
 		}
 	}
@@ -211,12 +247,10 @@ int main()
 		printf("Error opening file");
 		return 0;
 	}
-	// int rows = 0;
 	while (fgets(buffer, 1024, fp) != NULL) {
 		rows++;
 	}
 	char *tok = strtok(buffer, ",");
-	// int columns = 0;
 	while (tok != NULL) {
 		columns++;
 		tok = strtok(NULL, ",");
@@ -224,38 +258,49 @@ int main()
 
 	rows--;
 	columns--;
-	// int **mat = malloc((rows - 1) * sizeof(int *));
+
 	mat = malloc(rows * sizeof(int *));
+	websites = malloc(rows * sizeof(char *));
 
 	for (int i = 0; i < rows; i++) {
 		mat[i] = malloc(columns * sizeof(int));
 	}
 	fclose(fp);
+
 	fp = fopen("SampleInput.csv", "r");
+
 	int counter = 0;
 	while (fgets(buffer, 1024, fp) != NULL) {
 		counter++;
 		if (counter == 1) {
-			continue;
-		} else {
-			char *tken;
-			tken = strtok(buffer, ",");
+			char *tken = strtok(buffer, ",\n");
 			int i = 0;
 			while (tken != NULL) {
 				i++;
-				if (i == 1) {
-					tken = strtok(NULL, ",");
-					continue;
-				} else {
+				websites[i - 1] = malloc((strlen(tken) + 1) * sizeof(char));
+				strcpy(websites[i - 1], tken);
+				tken = strtok(NULL, ",\n");
+			}
+			// for (int j = 0; j < i; j++) {
+			// 	printf("%li: %s\n", strlen(websites[j]), websites[j]);
+			// }
+		} else {
+			char *tken;
+			tken = strtok(buffer, ",\n");
+			int i = 0;
+			while (tken != NULL) {
+				i++;
+				if (i != 1) {
 					mat[counter - 2][i - 2] = atoi(tken);
-					tken = strtok(NULL, ",");
 				}
+				tken = strtok(NULL, ",\n");
 			}
 		}
 	}
 	// printf("Rows: %d, Columns: %d\n", rows, columns);
 
 	menu1();
+
 	//Print the 2d array parsed from the SampleInput.csv file
 	// for (int i = 0; i < rows - 1; i++)
 	// {
