@@ -17,7 +17,7 @@ void copymat(int newmat[rows][columns])
 	}
 }
 
-void output(int mat[rows][columns])
+void tocsv(int newmat[rows][columns])
 {
 	FILE *fp = fopen("Output.csv", "w");
 	for (int i = 0; i < rows; i++) {
@@ -29,12 +29,46 @@ void output(int mat[rows][columns])
 			if (!j) {
 				fprintf(fp, "%s", websites[i]);
 			}
-			fprintf(fp, ",%d", mat[i][j]);
+			fprintf(fp, ",%d", newmat[i][j]);
 		}
 		fprintf(fp, "\n");
 	}
 
 	fclose(fp);
+}
+
+void reflexive_closure(int newmat[rows][columns])
+{
+	for (int i = 0; i < rows; i++) {
+		newmat[i][i] = 1;
+	}
+}
+
+void symmetric_closure(int newmat[rows][columns])
+{
+	for (int i = 0; i < columns; i++) {
+		for (int j = i; j < rows; j++) {
+			if (newmat[i][j]) {
+				newmat[j][i] = 1;
+			}
+		}
+	}
+}
+
+void transitive_closure(int newmat[rows][columns])
+{
+	// TODO transitive closure
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < columns; j++) {
+			if (newmat[i][j]) {
+				for (int k = 0; k < columns; k++) {
+					if (newmat[j][k]) {
+						newmat[i][k] = 1;
+					}
+				}
+			}
+		}
+	}
 }
 
 void menu2(int choice)
@@ -43,12 +77,35 @@ void menu2(int choice)
 	int cont;
 	scanf("%d", &cont);
 	if (cont) {
-		// TODO
 		switch (choice) {
 		case 1: {
 			int newmat[rows][columns];
 			copymat(newmat);
-			output(newmat);
+			reflexive_closure(newmat);
+			tocsv(newmat);
+			plot("Output.csv");
+		} break;
+		case 2: {
+			int newmat[rows][columns];
+			copymat(newmat);
+			symmetric_closure(newmat);
+			tocsv(newmat);
+			plot("Output.csv");
+		} break;
+		case 3: {
+			int newmat[rows][columns];
+			copymat(newmat);
+			transitive_closure(newmat);
+			tocsv(newmat);
+			plot("Output.csv");
+		} break;
+		case 7: {
+			int newmat[rows][columns];
+			copymat(newmat);
+			reflexive_closure(newmat);
+			symmetric_closure(newmat);
+			transitive_closure(newmat);
+			tocsv(newmat);
 			plot("Output.csv");
 		}
 		}
@@ -72,10 +129,8 @@ int is_reflexive()
 {
 	// Reflexive
 	for (int i = 0; i < rows; i++) {
-		for (int j = 0; j < columns; j++) {
-			if (mat[i][j] == 0) {
-				return 0;
-			}
+		if (!mat[i][i]) {
+			return 0;
 		}
 	}
 	return 1;
@@ -96,6 +151,7 @@ int is_symmetric()
 
 int is_transitive()
 {
+	//TODO fix this
 	// Transitive
 	for (int i = 0; i < rows; i++) {
 		for (int j = 0; j < columns; j++) {
@@ -124,7 +180,6 @@ int choice4()
 
 int choice5()
 {
-	// Changed
 	for (int i = 0; i < columns; i++) {
 		for (int j = i; j < rows; j++) {
 			if (mat[j][i] == 1 && mat[i][j] == 1) {
@@ -138,7 +193,6 @@ int choice5()
 int is_anti_symmetric()
 {
 	// Anti-Symmetric
-	// Changed
 	for (int i = 0; i < columns; i++) {
 		for (int j = i + 1; j < rows; j++) {
 			if (mat[j][i] == 1 && mat[i][j] == 1) {
@@ -152,7 +206,6 @@ int is_anti_symmetric()
 int choice7()
 {
 	// If relation is equivalence relation, its equivalence classes form a partition
-	// Completed
 	if (!is_reflexive() || !is_symmetric() || !is_transitive()) {
 		return 0;
 	}
@@ -161,7 +214,6 @@ int choice7()
 
 int is_poset()
 {
-	// Changed
 	return is_reflexive() && is_transitive() && is_anti_symmetric() ? 1 : 0;
 }
 
@@ -222,6 +274,7 @@ void menu1()
 			if (!ans) {
 				menu2(choice);
 			}
+			// TODO
 			break;
 		case 8:
 			ans = is_poset(mat, rows, columns);
@@ -242,7 +295,7 @@ void menu1()
 int main()
 {
 	char buffer[1024];
-	FILE *fp = fopen("SampleInput.csv", "r");
+	FILE *fp = fopen("Input.csv", "r");
 	if (fp == NULL) {
 		printf("Error opening file");
 		return 0;
@@ -267,7 +320,7 @@ int main()
 	}
 	fclose(fp);
 
-	fp = fopen("SampleInput.csv", "r");
+	fp = fopen("Input.csv", "r");
 
 	int counter = 0;
 	while (fgets(buffer, 1024, fp) != NULL) {
@@ -281,9 +334,6 @@ int main()
 				strcpy(websites[i - 1], tken);
 				tken = strtok(NULL, ",\n");
 			}
-			// for (int j = 0; j < i; j++) {
-			// 	printf("%li: %s\n", strlen(websites[j]), websites[j]);
-			// }
 		} else {
 			char *tken;
 			tken = strtok(buffer, ",\n");
@@ -297,19 +347,8 @@ int main()
 			}
 		}
 	}
-	// printf("Rows: %d, Columns: %d\n", rows, columns);
 
 	menu1();
 
-	//Print the 2d array parsed from the SampleInput.csv file
-	// for (int i = 0; i < rows - 1; i++)
-	// {
-	//     for (int j = 0; j < columns - 1; j++)
-	//     {
-	//         printf("%d", mat[i][j]);
-	//         printf(" ");
-	//     }
-	//     printf("\n");
-	// }
 	return 0;
 }
