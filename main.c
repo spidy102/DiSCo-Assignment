@@ -137,15 +137,52 @@ int menu3()
 
 void menu4()
 {
-	printf("1. Display the hasse diagram\n");
-	printf("2. Display the website whose link is available in every website\n");
-	printf("3. Display the website which has links of every website\n");
-	printf("4. Display the websites that do not have links to any other website except itself\n");
-	printf("5. Display the websites which cant be reached from any other website except itself\n");
-	printf("6. Given some websites, display the websites which are rechable from all of them\n");
-	printf("7. Given some websites, display the websites from which you can reach all those websites\n");
+	printf("1. Display the hasse diagram.\n");
+	printf("2. Display the website whose link is available in every website.\n");
+	printf("3. Display the website which has links of every website.\n");
+	printf("4. Display the websites that do not have links to any other website except itself.\n");
+	printf("5. Display the websites which can't be reached from any other website except itself.\n");
+	printf("6. Given some websites, display the websites which are rechable from all of them.\n");
+	printf("7. Given some websites, display the websites from which you can reach all those websites.\n");
 	printf("8. Is this relation an example of lattice?\n");
-	printf("9. Return to main menu\n");
+	printf("9. Return to Main Menu\n");
+
+	int choice;
+	scanf("%d", &choice);
+
+	switch (choice) {
+	case 1: {
+		//TODO
+	} break;
+	case 2: {
+		for (int i = 0; i < columns; i++) {
+			for (int j = 0; j < rows; j++) {
+				if (!mat[j][i]) {
+					break;
+				}
+				if (j == rows - 1) {
+					printf("%s\n", websites[i]);
+				}
+			}
+		}
+		// TODO no such website
+	} break;
+	case 3: {
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < columns; j++) {
+				if (!mat[i][j]) {
+					break;
+				}
+				if (j == columns - 1) {
+					printf("%s\n", websites[i]);
+				}
+			}
+		}
+		// TODO no such website
+	} break;
+	case 9:
+		return;
+	}
 }
 
 int is_reflexive()
@@ -189,7 +226,6 @@ int is_transitive()
 
 int choice4()
 {
-	// Changed
 	for (int i = 0; i < rows; i++) {
 		if (mat[i][i]) {
 			return 1;
@@ -303,7 +339,6 @@ void menu1()
 			ans = is_poset(mat, rows, columns);
 			printf(ans ? "Yes\n" : "No\n");
 			if (ans) {
-				// TODO
 				menu4();
 			}
 			break;
