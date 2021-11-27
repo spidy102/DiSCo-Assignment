@@ -47,9 +47,10 @@ void reflexive_closure(int newmat[rows][columns])
 void symmetric_closure(int newmat[rows][columns])
 {
 	for (int i = 0; i < columns; i++) {
-		for (int j = i; j < rows; j++) {
-			if (newmat[i][j]) {
+		for (int j = i + 1; j < rows; j++) {
+			if (newmat[i][j] || newmat[j][i]) {
 				newmat[j][i] = 1;
+				newmat[i][j] = 1;
 			}
 		}
 	}
@@ -57,15 +58,10 @@ void symmetric_closure(int newmat[rows][columns])
 
 void transitive_closure(int newmat[rows][columns])
 {
-	// TODO transitive closure
-	for (int i = 0; i < rows; i++) {
-		for (int j = 0; j < columns; j++) {
-			if (newmat[i][j]) {
-				for (int k = 0; k < columns; k++) {
-					if (newmat[j][k]) {
-						newmat[i][k] = 1;
-					}
-				}
+	for (int k = 0; k < rows; k++) {
+		for (int i = 0; i < columns; i++) {
+			for (int j = 0; j < columns; j++) {
+				newmat[i][j] = newmat[i][j] | (newmat[i][k] & newmat[k][j]);
 			}
 		}
 	}
@@ -112,6 +108,33 @@ void menu2(int choice)
 	}
 }
 
+int menu3()
+{
+	printf("Do you want to know the nodes in each piece? 1 for yes, 0 for no\n");
+	int cont;
+	scanf("%d", &cont);
+	if (cont) {
+		int piece = 1;
+		int alloted[rows];
+		memset(alloted, 0, rows * sizeof(int));
+		for (int i = 0; i < rows; i++) {
+			if (!alloted[i]) {
+				alloted[i] = 1;
+				printf("Piece %d: %s", piece, websites[i]);
+				for (int j = i + 1; j < columns; j++) {
+					if (mat[i][j]) {
+						alloted[j] = 1;
+						printf(" %s", websites[j]);
+					}
+				}
+				printf("\n");
+				piece++;
+			}
+		}
+	}
+	return cont;
+}
+
 void menu4()
 {
 	printf("1. Display the hasse diagram\n");
@@ -140,7 +163,7 @@ int is_symmetric()
 {
 	// Symmetric
 	for (int i = 0; i < columns; i++) {
-		for (int j = i; j < rows; j++) {
+		for (int j = i + 1; j < rows; j++) {
 			if ((mat[j][i] == 0 && mat[i][j] == 1) || (mat[j][i] == 1 && mat[i][j] == 0)) {
 				return 0;
 			}
@@ -151,15 +174,12 @@ int is_symmetric()
 
 int is_transitive()
 {
-	//TODO fix this
 	// Transitive
-	for (int i = 0; i < rows; i++) {
-		for (int j = 0; j < columns; j++) {
-			if (mat[i][j]) {
-				for (int k = 0; k < columns; k++) {
-					if (mat[j][k] && !mat[i][k]) {
-						return 0;
-					}
+	for (int k = 0; k < rows; k++) {
+		for (int i = 0; i < columns; i++) {
+			for (int j = 0; j < columns; j++) {
+				if (!mat[i][j] && mat[i][k] && mat[k][j]) {
+					return 0;
 				}
 			}
 		}
@@ -203,7 +223,7 @@ int is_anti_symmetric()
 	return 1;
 }
 
-int choice7()
+int is_equivalent()
 {
 	// If relation is equivalence relation, its equivalence classes form a partition
 	if (!is_reflexive() || !is_symmetric() || !is_transitive()) {
@@ -269,17 +289,20 @@ void menu1()
 			printf(ans ? "Yes\n" : "No\n");
 			break;
 		case 7:
-			ans = choice7();
+			ans = is_equivalent();
 			printf(ans ? "Yes\n" : "No\n");
 			if (!ans) {
 				menu2(choice);
+			} else {
+				if (menu3()) {
+					return;
+				}
 			}
-			// TODO
 			break;
 		case 8:
 			ans = is_poset(mat, rows, columns);
 			printf(ans ? "Yes\n" : "No\n");
-			if (!ans) {
+			if (ans) {
 				// TODO
 				menu4();
 			}
