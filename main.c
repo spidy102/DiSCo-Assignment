@@ -161,11 +161,11 @@ void menu4()
 					break;
 				}
 				if (j == rows - 1) {
-					printf("%s\n", websites[i]);
+					printf("%s ", websites[i]);
 				}
 			}
 		}
-		// TODO no such website
+		printf("\n");
 	} break;
 	case 3: {
 		for (int i = 0; i < rows; i++) {
@@ -174,11 +174,28 @@ void menu4()
 					break;
 				}
 				if (j == columns - 1) {
-					printf("%s\n", websites[i]);
+					printf("%s ", websites[i]);
 				}
 			}
 		}
-		// TODO no such website
+		printf("\n");
+	} break;
+	case 4: {
+		for (int i = 0; i < rows; i++) {
+			if (mat[i][i]) {
+				for (int j = 0; j < columns; j++) {
+					if (j != i && mat[i][j]) {
+						break;
+					}
+					if (j == columns - 1) {
+						printf("%s ", websites[i]);
+					}
+				}
+			}
+		}
+		printf("\n");
+	} break;
+	case 5: {
 	} break;
 	case 9:
 		return;
