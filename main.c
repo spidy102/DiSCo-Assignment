@@ -224,6 +224,19 @@ void menu4()
 		printf("\n");
 	} break;
 	case 5: {
+		for (int i = 0; i < columns; i++) {
+			if (mat[i][i]) {
+				for (int j = 0; j < rows; j++) {
+					if (j != i && mat[j][i]) {
+						break;
+					}
+					if (j == rows - 1) {
+						printf("%s ", websites[i]);
+					}
+				}
+			}
+		}
+		printf("\n");
 	} break;
 	case 9:
 		return;
