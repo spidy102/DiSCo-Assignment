@@ -135,6 +135,29 @@ int menu3()
 	return cont;
 }
 
+void make_irreflexive(int newmat[rows][columns])
+{
+	for (int i = 0; i < rows; i++) {
+		newmat[i][i] = 0;
+	}
+}
+
+void remove_transitivity(int newmat[rows][columns])
+{
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < columns; j++) {
+			if (newmat[i][j]) {
+				for (int k = 0; k < rows; k++) {
+					if (newmat[k][j] && newmat[i][k]) {
+						newmat[i][j] = 0;
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+
 void menu4()
 {
 	printf("1. Display the hasse diagram.\n");
@@ -152,7 +175,12 @@ void menu4()
 
 	switch (choice) {
 	case 1: {
-		//TODO
+		int newmat[rows][columns];
+		copymat(newmat);
+		make_irreflexive(newmat);
+		remove_transitivity(newmat);
+		tocsv(newmat);
+		plot("Output.csv");
 	} break;
 	case 2: {
 		for (int i = 0; i < columns; i++) {
