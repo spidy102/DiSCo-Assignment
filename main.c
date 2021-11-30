@@ -137,6 +137,7 @@ int checkLattice()
                     countL++;
                 }
             }
+
             upperBounds = malloc(rows * sizeof(int));
             countU = 0;
             for (int k = 0; k < rows; k++)
@@ -147,13 +148,14 @@ int checkLattice()
                     countU++;
                 }
             }
+
             for (int k = 0; k < countL; k++)
             {
                 for (int l = 0; l < countL; l++)
                 {
                     if (k != l)
                     {
-                        if (!mat[l][k])
+                        if (!mat[lowerBounds[l]][lowerBounds[k]])
                         {
                             break;
                         }
@@ -172,7 +174,7 @@ int checkLattice()
                 {
                     if (k != l)
                     {
-                        if (!mat[k][l])
+                        if (!mat[upperBounds[k]][upperBounds[l]])
                         {
                             break;
                         }
@@ -198,6 +200,70 @@ int checkLattice()
         }
     }
     return 1;
+}
+
+void handleCase1(char *websiteA, char *websiteB)
+{
+    int indexA = -1;
+    int indexB = -1;
+    for (int i = 0; i < rows; i++)
+    {
+        if (strcmp(websiteA, websites[i]) == 0)
+        {
+            indexA = i;
+        }
+        if (strcmp(websiteB, websites[i]) == 0)
+        {
+            indexB = i;
+        }
+        if (indexA != -1 && indexB != -1)
+        {
+            break;
+        }
+    }
+
+    int *reachableFromAB = malloc(rows * sizeof(int));
+    int count = 0;
+    for (int i = 0; i < columns; i++)
+    {
+        if (mat[indexA][i] == 1 && mat[indexB][i] == 1)
+        {
+            reachableFromAB[count] = i;
+            count++;
+        }
+    }
+
+    int *answer = malloc(rows * sizeof(int));
+    int answerCount = 0;
+    for (int i = 0; i < count; i++)
+    {
+        for (int j = 0; j < count; j++)
+        {
+            if (!mat[i][j])
+            {
+                break;
+            }
+            if (j == count - 1)
+            {
+                answer[answerCount] = i;
+                answerCount++;
+            }
+        }
+    }
+
+    if (answerCount == 0)
+    {
+        printf("\nNo such wesbites exist\n");
+    }
+    else
+    {
+        printf("\nThe following are the websites which satisfy the properties:\n");
+        for (int i = 0; i < answerCount; i++)
+        {
+            printf("%s\n", websites[answer[i]]);
+        }
+    }
+    return;
 }
 
 void reflexive_closure(int newmat[rows][columns])
@@ -345,6 +411,44 @@ void remove_transitivity(int newmat[rows][columns])
                 }
             }
         }
+    }
+}
+
+void menu5()
+{
+    printf("1. Given two websites A and B, display the website which is reachable by both A and B and can also reach to all such websites that both A and B can reach.\n");
+    printf("2. Given two websites A and B, display the website which can reach to both A and B and is also reachable from all such websites which can reach to both A and B.\n");
+    printf("3. Is the lattice distributive?\n");
+    printf("4. Return to menu 4\n");
+    int choice;
+    scanf("%d", &choice);
+    getchar();
+    switch (choice)
+    {
+    case 1:
+    {
+        printf("Enter both the websites:\n");
+        char *websiteA = malloc(1024 * sizeof(char));
+        char *websiteB = malloc(1024 * sizeof(char));
+        fgets(websiteA, 1024, stdin);
+        websiteA[strcspn(websiteA, "\n")] = 0;
+        while (!is_a_website(websiteA))
+        {
+            printf("Please enter a valid website\n");
+            fgets(websiteA, 1024, stdin);
+            websiteA[strcspn(websiteA, "\n")] = 0;
+        }
+        fgets(websiteB, 1024, stdin);
+        websiteB[strcspn(websiteB, "\n")] = 0;
+        while (!is_a_website(websiteB))
+        {
+            printf("Please enter a valid website\n");
+            fgets(websiteB, 1024, stdin);
+            websiteB[strcspn(websiteB, "\n")] = 0;
+        }
+        handleCase1(websiteA, websiteB);
+    }
+    break;
     }
 }
 
@@ -528,7 +632,7 @@ void menu4()
         if (res == 1)
         {
             printf("Yes\n");
-            // menu5();
+            menu5();
         }
         else
         {
