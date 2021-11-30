@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// #include "visualiser.c"
+#include "visualiser.c"
 
 char **websites;
 int **mat;
@@ -382,7 +382,7 @@ void menu2(int choice)
             copymat(newmat);
             reflexive_closure(newmat);
             tocsv(newmat);
-            // plot("Output.csv");
+            plot("Output.csv");
         }
         break;
         case 2:
@@ -391,7 +391,7 @@ void menu2(int choice)
             copymat(newmat);
             symmetric_closure(newmat);
             tocsv(newmat);
-            // plot("Output.csv");
+            plot("Output.csv");
         }
         break;
         case 3:
@@ -400,7 +400,7 @@ void menu2(int choice)
             copymat(newmat);
             transitive_closure(newmat);
             tocsv(newmat);
-            // plot("Output.csv");
+            plot("Output.csv");
         }
         break;
         case 7:
@@ -411,7 +411,7 @@ void menu2(int choice)
             symmetric_closure(newmat);
             transitive_closure(newmat);
             tocsv(newmat);
-            // plot("Output.csv");
+            plot("Output.csv");
         }
         }
     }
@@ -562,7 +562,7 @@ void menu4()
         make_irreflexive(newmat);
         remove_transitivity(newmat);
         tocsv(newmat);
-        // plot("Output.csv");
+        plot("Output.csv");
     }
     break;
     case 2:
