@@ -19,7 +19,7 @@ void copymat(int newmat[rows][columns])
         }
     }
 }
-
+void menu4();
 void tocsv(int newmat[rows][columns])
 {
     FILE *fp = fopen("Output.csv", "w");
@@ -330,6 +330,99 @@ void handleCase2(char *websiteA, char *websiteB)
     return;
 }
 
+int getLUB(int a, int b)
+{
+    int *upperBounds = malloc(rows * sizeof(int));
+    int countU = 0;
+    for (int k = 0; k < rows; k++)
+    {
+        if (mat[a][k] && mat[b][k])
+        {
+            upperBounds[countU] = k;
+            countU++;
+        }
+    }
+    for (int k = 0; k < countU; k++)
+    {
+        for (int l = 0; l < countU; l++)
+        {
+            if (k != l)
+            {
+                if (!mat[upperBounds[k]][upperBounds[l]])
+                {
+                    break;
+                }
+            }
+            if (l == countU - 1)
+            {
+                return upperBounds[k];
+            }
+        }
+    }
+    return 0;
+}
+
+int getGLB(int a, int b)
+{
+    int *lowerBounds = malloc(rows * sizeof(int));
+    int countL = 0;
+    for (int k = 0; k < rows; k++)
+    {
+        if (mat[k][a] && mat[k][b])
+        {
+            lowerBounds[countL] = k;
+            countL++;
+        }
+    }
+    for (int k = 0; k < countL; k++)
+    {
+        for (int l = 0; l < countL; l++)
+        {
+            if (k != l)
+            {
+                if (!mat[lowerBounds[l]][lowerBounds[k]])
+                {
+                    break;
+                }
+            }
+            if (l == countL - 1)
+            {
+                return lowerBounds[k];
+            }
+        }
+    }
+    return 0;
+}
+
+int handleCase3()
+{
+    for (int a = 0; a < rows; a++)
+    {
+        for (int b = a + 1; b < rows; b++)
+        {
+            for (int c = b + 1; c < rows; c++)
+            {
+                int res1 = getLUB(getGLB(a, b), getGLB(a, c));
+                int res2 = getGLB(a, getLUB(b, c));
+                if (res1 == res2)
+                {
+                    int res3 = getLUB(a, getGLB(b, c));
+                    int res4 = getGLB(getLUB(a, b), getLUB(b, c));
+                    if (res3 != res4)
+                    {
+                        return 0;
+                    }
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
+    }
+    return 1;
+}
+
 void reflexive_closure(int newmat[rows][columns])
 {
     for (int i = 0; i < rows; i++)
@@ -536,6 +629,23 @@ void menu5()
         handleCase2(websiteA, websiteB);
     }
     break;
+    case 3:
+    {
+        int res = handleCase3();
+        if (res)
+        {
+            printf("\nYes\n");
+        }
+        else
+        {
+            printf("\nNo\n");
+        }
+    }
+    break;
+    case 4:
+    {
+        menu4();
+    }
     }
 }
 
