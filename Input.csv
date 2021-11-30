@@ -1,6 +1,7 @@
-,1,3,5,12,15
-1,1,1,1,1,1
-3,0,1,0,1,1
-5,0,0,1,0,1
-12,0,0,0,1,0
-15,0,0,0,0,1
+,TheTreeCut.com,ConveyLaws.com,ZerosMind.com,RisingRole.com,WaveWaters.com,7
+TheTreeCut.com,1,1,1,1,1,1
+ConveyLaws.com,0,1,0,1,1,1
+ZerosMind.com,0,0,1,1,1,1
+RisingRole.com,0,0,0,1,0,1
+WaveWaters.com,0,0,0,0,1,1
+7,0,0,0,0,0,1
