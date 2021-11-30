@@ -18,7 +18,6 @@ void copymat(int newmat[rows][columns])
 		}
 	}
 }
-void menu4();
 void tocsv(int newmat[rows][columns])
 {
 	FILE *fp = fopen("Output.csv", "w");
@@ -39,6 +38,106 @@ void tocsv(int newmat[rows][columns])
 	fclose(fp);
 }
 
+
+void reflexive_closure(int newmat[rows][columns])
+{
+	for (int i = 0; i < rows; i++) {
+		newmat[i][i] = 1;
+	}
+}
+
+void symmetric_closure(int newmat[rows][columns])
+{
+	for (int i = 0; i < columns; i++) {
+		for (int j = i + 1; j < rows; j++) {
+			if (newmat[i][j] || newmat[j][i]) {
+				newmat[j][i] = 1;
+				newmat[i][j] = 1;
+			}
+		}
+	}
+}
+
+void transitive_closure(int newmat[rows][columns])
+{
+	for (int k = 0; k < rows; k++) {
+		for (int i = 0; i < columns; i++) {
+			for (int j = 0; j < columns; j++) {
+				newmat[i][j] = newmat[i][j] | (newmat[i][k] & newmat[k][j]);
+			}
+		}
+	}
+}
+
+void menu2(int choice)
+{
+	printf("Menu 2\n");
+	printf("Do you want to visualize how the network will look if we add minimum links to satisfy this property? 1 for yes, 0 for no\n");
+	int cont;
+	scanf("%d", &cont);
+	if (cont) {
+		switch (choice) {
+		case 1: {
+			int newmat[rows][columns];
+			copymat(newmat);
+			reflexive_closure(newmat);
+			tocsv(newmat);
+			plot("Output.csv");
+		} break;
+		case 2: {
+			int newmat[rows][columns];
+			copymat(newmat);
+			symmetric_closure(newmat);
+			tocsv(newmat);
+			plot("Output.csv");
+		} break;
+		case 3: {
+			int newmat[rows][columns];
+			copymat(newmat);
+			transitive_closure(newmat);
+			tocsv(newmat);
+			plot("Output.csv");
+		} break;
+		case 7: {
+			int newmat[rows][columns];
+			copymat(newmat);
+			reflexive_closure(newmat);
+			symmetric_closure(newmat);
+			transitive_closure(newmat);
+			tocsv(newmat);
+			plot("Output.csv");
+		}
+		}
+	}
+}
+
+void menu3()
+{
+	printf("Menu 3\n");
+	printf("Do you want to know the nodes in each piece? 1 for yes, 0 for no\n");
+	int cont;
+	scanf("%d", &cont);
+	if (cont) {
+		int piece = 1;
+		int alloted[rows];
+		memset(alloted, 0, rows * sizeof(int));
+		for (int i = 0; i < rows; i++) {
+			if (!alloted[i]) {
+				alloted[i] = 1;
+				printf("Piece %d: %s", piece, websites[i]);
+				for (int j = i + 1; j < columns; j++) {
+					if (mat[i][j]) {
+						alloted[j] = 1;
+						printf(" %s", websites[j]);
+					}
+				}
+				printf("\n");
+				piece++;
+			}
+		}
+	}
+}
+
 int is_a_website(char *website)
 {
 	for (int i = 0; i < rows; i++) {
@@ -47,120 +146,6 @@ int is_a_website(char *website)
 		}
 	}
 	return 0;
-}
-
-int checkAlreadyPresent(char **arr, char *target, int len)
-{
-	int i;
-	for (i = 0; i < len; i++) {
-		if (strncmp(arr[i], target, strlen(target)) == 0) {
-			return 1;
-		}
-	}
-	return 0;
-}
-
-int populateReachableWebsites(int *websitesList, char **reachableWebsites, int len, int current)
-{
-	for (int i = 0; i < rows; i++) {
-		for (int j = 0; j < len; j++) {
-			if (!mat[websitesList[j]][i]) {
-				break;
-			}
-			if (j == len - 1) {
-				reachableWebsites[current] = malloc((strlen(websites[i])) * sizeof(char));
-				reachableWebsites[current] = websites[i];
-				current++;
-			}
-		}
-	}
-
-	return current;
-}
-
-int populateReachableFromWebsites(int *websitesList, char **reachableWebsites, int len, int current)
-{
-	for (int i = 0; i < rows; i++) {
-		for (int j = 0; j < len; j++) {
-			if (!mat[i][websitesList[j]]) {
-				break;
-			}
-			if (j == len - 1) {
-				reachableWebsites[current] = malloc((strlen(websites[i])) * sizeof(char));
-				reachableWebsites[current] = websites[i];
-				current++;
-			}
-		}
-	}
-
-	return current;
-}
-
-int checkLattice()
-{
-	int *upperBounds;
-	int countU = 0;
-	int *lowerBounds;
-	int countL = 0;
-	int foundLeastUpperBound = 0;
-	int foundGreatestLowerBound = 0;
-	for (int i = 0; i < rows; i++) {
-		for (int j = i + 1; j < rows; j++) {
-			lowerBounds = malloc(rows * sizeof(int));
-			countL = 0;
-			for (int k = 0; k < rows; k++) {
-				if (mat[k][i] && mat[k][j]) {
-					lowerBounds[countL] = k;
-					countL++;
-				}
-			}
-
-			upperBounds = malloc(rows * sizeof(int));
-			countU = 0;
-			for (int k = 0; k < rows; k++) {
-				if (mat[i][k] && mat[j][k]) {
-					upperBounds[countU] = k;
-					countU++;
-				}
-			}
-
-			for (int k = 0; k < countL; k++) {
-				for (int l = 0; l < countL; l++) {
-					if (k != l) {
-						if (!mat[lowerBounds[l]][lowerBounds[k]]) {
-							break;
-						}
-					}
-					if (l == countL - 1) {
-						foundGreatestLowerBound = 1;
-						k = countL;
-						break;
-					}
-				}
-			}
-			for (int k = 0; k < countU; k++) {
-				for (int l = 0; l < countU; l++) {
-					if (k != l) {
-						if (!mat[upperBounds[k]][upperBounds[l]]) {
-							break;
-						}
-					}
-					if (l == countU - 1) {
-						foundLeastUpperBound = 1;
-						k = countU;
-						break;
-					}
-				}
-			}
-
-			if (!foundGreatestLowerBound || !foundLeastUpperBound) {
-				return 0;
-			}
-			foundGreatestLowerBound = 0;
-			foundLeastUpperBound = 0;
-		}
-	}
-	return 1;
 }
 
 void handleCase1(char *websiteA, char *websiteB)
@@ -335,102 +320,71 @@ int handleCase3()
 	return 1;
 }
 
-void reflexive_closure(int newmat[rows][columns])
+void menu5()
 {
-	for (int i = 0; i < rows; i++) {
-		newmat[i][i] = 1;
-	}
-}
-
-void symmetric_closure(int newmat[rows][columns])
-{
-	for (int i = 0; i < columns; i++) {
-		for (int j = i + 1; j < rows; j++) {
-			if (newmat[i][j] || newmat[j][i]) {
-				newmat[j][i] = 1;
-				newmat[i][j] = 1;
-			}
-		}
-	}
-}
-
-void transitive_closure(int newmat[rows][columns])
-{
-	for (int k = 0; k < rows; k++) {
-		for (int i = 0; i < columns; i++) {
-			for (int j = 0; j < columns; j++) {
-				newmat[i][j] = newmat[i][j] | (newmat[i][k] & newmat[k][j]);
-			}
-		}
-	}
-}
-
-void menu2(int choice)
-{
-	printf("Do you want to visualize how the network will look if we add minimum links to satisfy this property? 1 for yes, 0 for no\n");
-	int cont;
-	scanf("%d", &cont);
-	if (cont) {
+	while (1) {
+		printf("Menu 5\n");
+		printf("1. Given two websites A and B, display the website which is reachable by both A and B and can also reach to all such websites that both A and B can reach.\n");
+		printf("2. Given two websites A and B, display the website which can reach to both A and B and is also reachable from all such websites which can reach to both A and B.\n");
+		printf("3. Is the lattice distributive?\n");
+		printf("4. Return to menu 4\n");
+		int choice;
+		scanf(" %d", &choice);
+		getchar();
 		switch (choice) {
 		case 1: {
-			int newmat[rows][columns];
-			copymat(newmat);
-			reflexive_closure(newmat);
-			tocsv(newmat);
-			plot("Output.csv");
+			printf("Enter both the websites:\n");
+			char *websiteA = malloc(1024 * sizeof(char));
+			char *websiteB = malloc(1024 * sizeof(char));
+			fgets(websiteA, 1024, stdin);
+			websiteA[strcspn(websiteA, "\n")] = 0;
+			while (!is_a_website(websiteA)) {
+				printf("Please enter a valid website\n");
+				fgets(websiteA, 1024, stdin);
+				websiteA[strcspn(websiteA, "\n")] = 0;
+			}
+			fgets(websiteB, 1024, stdin);
+			websiteB[strcspn(websiteB, "\n")] = 0;
+			while (!is_a_website(websiteB)) {
+				printf("Please enter a valid website\n");
+				fgets(websiteB, 1024, stdin);
+				websiteB[strcspn(websiteB, "\n")] = 0;
+			}
+			handleCase1(websiteA, websiteB);
 		} break;
 		case 2: {
-			int newmat[rows][columns];
-			copymat(newmat);
-			symmetric_closure(newmat);
-			tocsv(newmat);
-			plot("Output.csv");
+			printf("Enter both the websites:\n");
+			char *websiteA = malloc(1024 * sizeof(char));
+			char *websiteB = malloc(1024 * sizeof(char));
+			fgets(websiteA, 1024, stdin);
+			websiteA[strcspn(websiteA, "\n")] = 0;
+			while (!is_a_website(websiteA)) {
+				printf("Please enter a valid website\n");
+				fgets(websiteA, 1024, stdin);
+				websiteA[strcspn(websiteA, "\n")] = 0;
+			}
+			fgets(websiteB, 1024, stdin);
+			websiteB[strcspn(websiteB, "\n")] = 0;
+			while (!is_a_website(websiteB)) {
+				printf("Please enter a valid website\n");
+				fgets(websiteB, 1024, stdin);
+				websiteB[strcspn(websiteB, "\n")] = 0;
+			}
+			handleCase2(websiteA, websiteB);
 		} break;
 		case 3: {
-			int newmat[rows][columns];
-			copymat(newmat);
-			transitive_closure(newmat);
-			tocsv(newmat);
-			plot("Output.csv");
-		} break;
-		case 7: {
-			int newmat[rows][columns];
-			copymat(newmat);
-			reflexive_closure(newmat);
-			symmetric_closure(newmat);
-			transitive_closure(newmat);
-			tocsv(newmat);
-			plot("Output.csv");
-		}
-		}
-	}
-}
-
-int menu3()
-{
-	printf("Do you want to know the nodes in each piece? 1 for yes, 0 for no\n");
-	int cont;
-	scanf("%d", &cont);
-	if (cont) {
-		int piece = 1;
-		int alloted[rows];
-		memset(alloted, 0, rows * sizeof(int));
-		for (int i = 0; i < rows; i++) {
-			if (!alloted[i]) {
-				alloted[i] = 1;
-				printf("Piece %d: %s", piece, websites[i]);
-				for (int j = i + 1; j < columns; j++) {
-					if (mat[i][j]) {
-						alloted[j] = 1;
-						printf(" %s", websites[j]);
-					}
-				}
-				printf("\n");
-				piece++;
+			int res = handleCase3();
+			if (res) {
+				printf("\nYes\n");
+			} else {
+				printf("\nNo\n");
 			}
+		} break;
+		case 4: {
+			return;
+		}
 		}
 	}
-	return cont;
 }
 
 void make_irreflexive(int newmat[rows][columns])
@@ -456,139 +410,138 @@ void remove_transitivity(int newmat[rows][columns])
 	}
 }
 
-void menu5()
+int populateReachableWebsites(int *websitesList, char **reachableWebsites, int len, int current)
 {
-	printf("1. Given two websites A and B, display the website which is reachable by both A and B and can also reach to all such websites that both A and B can reach.\n");
-	printf("2. Given two websites A and B, display the website which can reach to both A and B and is also reachable from all such websites which can reach to both A and B.\n");
-	printf("3. Is the lattice distributive?\n");
-	printf("4. Return to menu 4\n");
-	int choice;
-	scanf("%d", &choice);
-	getchar();
-	switch (choice) {
-	case 1: {
-		printf("Enter both the websites:\n");
-		char *websiteA = malloc(1024 * sizeof(char));
-		char *websiteB = malloc(1024 * sizeof(char));
-		fgets(websiteA, 1024, stdin);
-		websiteA[strcspn(websiteA, "\n")] = 0;
-		while (!is_a_website(websiteA)) {
-			printf("Please enter a valid website\n");
-			fgets(websiteA, 1024, stdin);
-			websiteA[strcspn(websiteA, "\n")] = 0;
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < len; j++) {
+			if (!mat[websitesList[j]][i]) {
+				break;
+			}
+			if (j == len - 1) {
+				reachableWebsites[current] = malloc((strlen(websites[i])) * sizeof(char));
+				reachableWebsites[current] = websites[i];
+				current++;
+			}
 		}
-		fgets(websiteB, 1024, stdin);
-		websiteB[strcspn(websiteB, "\n")] = 0;
-		while (!is_a_website(websiteB)) {
-			printf("Please enter a valid website\n");
-			fgets(websiteB, 1024, stdin);
-			websiteB[strcspn(websiteB, "\n")] = 0;
-		}
-		handleCase1(websiteA, websiteB);
 	}
-	case 2: {
-		printf("Enter both the websites:\n");
-		char *websiteA = malloc(1024 * sizeof(char));
-		char *websiteB = malloc(1024 * sizeof(char));
-		fgets(websiteA, 1024, stdin);
-		websiteA[strcspn(websiteA, "\n")] = 0;
-		while (!is_a_website(websiteA)) {
-			printf("Please enter a valid website\n");
-			fgets(websiteA, 1024, stdin);
-			websiteA[strcspn(websiteA, "\n")] = 0;
+
+	return current;
+}
+
+int populateReachableFromWebsites(int *websitesList, char **reachableWebsites, int len, int current)
+{
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < len; j++) {
+			if (!mat[i][websitesList[j]]) {
+				break;
+			}
+			if (j == len - 1) {
+				reachableWebsites[current] = malloc((strlen(websites[i])) * sizeof(char));
+				reachableWebsites[current] = websites[i];
+				current++;
+			}
 		}
-		fgets(websiteB, 1024, stdin);
-		websiteB[strcspn(websiteB, "\n")] = 0;
-		while (!is_a_website(websiteB)) {
-			printf("Please enter a valid website\n");
-			fgets(websiteB, 1024, stdin);
-			websiteB[strcspn(websiteB, "\n")] = 0;
-		}
-		handleCase2(websiteA, websiteB);
-	} break;
-	case 3: {
-		int res = handleCase3();
-		if (res) {
-			printf("\nYes\n");
-		} else {
-			printf("\nNo\n");
-		}
-	} break;
-	case 4: {
-		menu4();
 	}
+
+	return current;
+}
+
+int checkLattice()
+{
+	int *upperBounds;
+	int countU = 0;
+	int *lowerBounds;
+	int countL = 0;
+	int foundLeastUpperBound = 0;
+	int foundGreatestLowerBound = 0;
+	for (int i = 0; i < rows; i++) {
+		for (int j = i + 1; j < rows; j++) {
+			lowerBounds = malloc(rows * sizeof(int));
+			countL = 0;
+			for (int k = 0; k < rows; k++) {
+				if (mat[k][i] && mat[k][j]) {
+					lowerBounds[countL] = k;
+					countL++;
+				}
+			}
+
+			upperBounds = malloc(rows * sizeof(int));
+			countU = 0;
+			for (int k = 0; k < rows; k++) {
+				if (mat[i][k] && mat[j][k]) {
+					upperBounds[countU] = k;
+					countU++;
+				}
+			}
+
+			for (int k = 0; k < countL; k++) {
+				for (int l = 0; l < countL; l++) {
+					if (k != l) {
+						if (!mat[lowerBounds[l]][lowerBounds[k]]) {
+							break;
+						}
+					}
+					if (l == countL - 1) {
+						foundGreatestLowerBound = 1;
+						k = countL;
+						break;
+					}
+				}
+			}
+			for (int k = 0; k < countU; k++) {
+				for (int l = 0; l < countU; l++) {
+					if (k != l) {
+						if (!mat[upperBounds[k]][upperBounds[l]]) {
+							break;
+						}
+					}
+					if (l == countU - 1) {
+						foundLeastUpperBound = 1;
+						k = countU;
+						break;
+					}
+				}
+			}
+
+			if (!foundGreatestLowerBound || !foundLeastUpperBound) {
+				return 0;
+			}
+			foundGreatestLowerBound = 0;
+			foundLeastUpperBound = 0;
+		}
 	}
+	return 1;
 }
 
 void menu4()
 {
-	printf("1. Display the hasse diagram.\n");
-	printf("2. Display the website whose link is available in every website.\n");
-	printf("3. Display the website which has links of every website.\n");
-	printf("4. Display the websites that do not have links to any other website except itself.\n");
-	printf("5. Display the websites which can't be reached from any other website except itself.\n");
-	printf("6. Given some websites, display the websites which are rechable from all of them.\n");
-	printf("7. Given some websites, display the websites from which you can reach all those websites.\n");
-	printf("8. Is this relation an example of lattice?\n");
-	printf("9. Return to Main Menu\n");
+	while (1) {
+		printf("Menu 4\n");
+		printf("1. Display the hasse diagram.\n");
+		printf("2. Display the website whose link is available in every website.\n");
+		printf("3. Display the website which has links of every website.\n");
+		printf("4. Display the websites that do not have links to any other website except itself.\n");
+		printf("5. Display the websites which can't be reached from any other website except itself.\n");
+		printf("6. Given some websites, display the websites which are rechable from all of them.\n");
+		printf("7. Given some websites, display the websites from which you can reach all those websites.\n");
+		printf("8. Is this relation an example of lattice?\n");
+		printf("9. Return to Main Menu\n");
 
-	int choice;
-	scanf("%d", &choice);
-	switch (choice) {
-	case 1: {
-		int newmat[rows][columns];
-		copymat(newmat);
-		make_irreflexive(newmat);
-		remove_transitivity(newmat);
-		tocsv(newmat);
-		plot("Output.csv");
-	} break;
-	case 2: {
-		for (int i = 0; i < columns; i++) {
-			for (int j = 0; j < rows; j++) {
-				if (!mat[j][i]) {
-					break;
-				}
-				if (j == rows - 1) {
-					printf("%s ", websites[i]);
-				}
-			}
-		}
-		printf("\n");
-	} break;
-	case 3: {
-		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < columns; j++) {
-				if (!mat[i][j]) {
-					break;
-				}
-				if (j == columns - 1) {
-					printf("%s ", websites[i]);
-				}
-			}
-		}
-		printf("\n");
-	} break;
-	case 4: {
-		for (int i = 0; i < rows; i++) {
-			if (mat[i][i]) {
-				for (int j = 0; j < columns; j++) {
-					if (j != i && mat[i][j]) {
-						break;
-					}
-					if (j == columns - 1) {
-						printf("%s ", websites[i]);
-					}
-				}
-			}
-		}
-		printf("\n");
-	} break;
-	case 5: {
-		for (int i = 0; i < columns; i++) {
-			if (mat[i][i]) {
+		int choice;
+		scanf("%d", &choice);
+		switch (choice) {
+		case 1: {
+			int newmat[rows][columns];
+			copymat(newmat);
+			make_irreflexive(newmat);
+			remove_transitivity(newmat);
+			tocsv(newmat);
+			plot("Output.csv");
+		} break;
+		case 2: {
+			for (int i = 0; i < columns; i++) {
 				for (int j = 0; j < rows; j++) {
-					if (j != i && mat[j][i]) {
+					if (!mat[j][i]) {
 						break;
 					}
 					if (j == rows - 1) {
@@ -596,84 +549,125 @@ void menu4()
 					}
 				}
 			}
-		}
-		printf("\n");
-	} break;
-	case 6: {
-		char *website;
-		printf("Enter the number of websites: ");
-		int x;
-		scanf("%d", &x);
-		getchar();
-		char **reachableWebsites = malloc(rows * sizeof(char *));
-		int current = 0;
-		int *enteredWebsites = malloc(rows * sizeof(int));
-		int counter = 0;
-		for (int i = 0; i < x; i++) {
-			website = malloc(1024 * sizeof(char));
-			fgets(website, 1024, stdin);
-			website[strcspn(website, "\n")] = 0;
-			int res = is_a_website(website);
-			if (res != 0) {
-				enteredWebsites[counter] = res - 1;
-				counter++;
-			} else {
-				printf("Website does not exist, please input another: ");
-				i--;
-			}
-		}
-
-		current = populateReachableWebsites(enteredWebsites, reachableWebsites, counter, current);
-		printf("\nThe websites are:\n");
-		for (int i = 0; i < current; i++) {
-			printf(" %s", reachableWebsites[i]);
 			printf("\n");
-		}
-		printf("\n");
-	} break;
-	case 7: {
-		char *website = malloc(1024 * sizeof(char));
-		printf("Enter the number of websites:");
-		int x;
-		scanf("%d", &x);
-		getchar();
-		char **reachableWebsites = malloc(rows * sizeof(char *));
-		int *enteredWebsites = malloc(rows * sizeof(int));
-		int counter = 0;
-		int current = 0;
-		for (int i = 0; i < x; i++) {
-			realloc(website, 1024 * sizeof(char));
-			fgets(website, 1024, stdin);
-			website[strcspn(website, "\n")] = 0;
-			int res = is_a_website(website);
-			if (res != 0) {
-				enteredWebsites[counter] = res - 1;
-				counter++;
-			} else {
-				printf("Website does not exist, please input another:");
-				i--;
+		} break;
+		case 3: {
+			for (int i = 0; i < rows; i++) {
+				for (int j = 0; j < columns; j++) {
+					if (!mat[i][j]) {
+						break;
+					}
+					if (j == columns - 1) {
+						printf("%s ", websites[i]);
+					}
+				}
 			}
-		}
-		current = populateReachableFromWebsites(enteredWebsites, reachableWebsites, counter, current);
-
-		printf("\nThe websites are:\n");
-		for (int i = 0; i < current; i++) {
-			printf("%s", reachableWebsites[i]);
 			printf("\n");
+		} break;
+		case 4: {
+			for (int i = 0; i < rows; i++) {
+				if (mat[i][i]) {
+					for (int j = 0; j < columns; j++) {
+						if (j != i && mat[i][j]) {
+							break;
+						}
+						if (j == columns - 1) {
+							printf("%s ", websites[i]);
+						}
+					}
+				}
+			}
+			printf("\n");
+		} break;
+		case 5: {
+			for (int i = 0; i < columns; i++) {
+				if (mat[i][i]) {
+					for (int j = 0; j < rows; j++) {
+						if (j != i && mat[j][i]) {
+							break;
+						}
+						if (j == rows - 1) {
+							printf("%s ", websites[i]);
+						}
+					}
+				}
+			}
+			printf("\n");
+		} break;
+		case 6: {
+			char *website;
+			printf("Enter the number of websites: ");
+			int x;
+			scanf("%d", &x);
+			getchar();
+			char **reachableWebsites = malloc(rows * sizeof(char *));
+			int current = 0;
+			int *enteredWebsites = malloc(rows * sizeof(int));
+			int counter = 0;
+			for (int i = 0; i < x; i++) {
+				website = malloc(1024 * sizeof(char));
+				fgets(website, 1024, stdin);
+				website[strcspn(website, "\n")] = 0;
+				int res = is_a_website(website);
+				if (res != 0) {
+					enteredWebsites[counter] = res - 1;
+					counter++;
+				} else {
+					printf("Website does not exist, please input another: ");
+					i--;
+				}
+			}
+
+			current = populateReachableWebsites(enteredWebsites, reachableWebsites, counter, current);
+			printf("\nThe websites are:");
+			for (int i = 0; i < current; i++) {
+				printf(" %s", reachableWebsites[i]);
+			}
+			printf("\n");
+		} break;
+		case 7: {
+			char *website = malloc(1024 * sizeof(char));
+			printf("Enter the number of websites:");
+			int x;
+			scanf("%d", &x);
+			getchar();
+			char **reachableWebsites = malloc(rows * sizeof(char *));
+			int *enteredWebsites = malloc(rows * sizeof(int));
+			int counter = 0;
+			int current = 0;
+			for (int i = 0; i < x; i++) {
+				realloc(website, 1024 * sizeof(char));
+				fgets(website, 1024, stdin);
+				website[strcspn(website, "\n")] = 0;
+				int res = is_a_website(website);
+				if (res != 0) {
+					enteredWebsites[counter] = res - 1;
+					counter++;
+				} else {
+					printf("Website does not exist, please input another:");
+					i--;
+				}
+			}
+			current = populateReachableFromWebsites(enteredWebsites, reachableWebsites, counter, current);
+
+			printf("\nThe websites are:");
+			for (int i = 0; i < current; i++) {
+				printf(" %s", reachableWebsites[i]);
+			}
+			printf("\n");
+		} break;
+		case 8: {
+			int res = checkLattice();
+			if (res == 1) {
+				printf("Yes\n");
+				menu5();
+			} else {
+				printf("No\n");
+			}
+		} break;
+		case 9:
+			return;
 		}
-		printf("\n");
-	} break;
-	case 8: {
-		int res = checkLattice();
-		if (res == 1) {
-			printf("Yes\n");
-			menu5();
-		} else {
-			printf("No\n");
-		}
-	} break;
-	case 9:
-		return;
 	}
 }
 
@@ -768,8 +762,7 @@ int is_poset()
 void menu1()
 {
 	while (1) {
-		printf("Main Menu");
-		printf("\n");
+		printf("Main Menu\n");
 		printf("1. Does every website has a link to itself?\n");
 		printf("2. Is it possible to always return back to the previous website from the current website in one step?\n");
 		printf("3. Does every website has all the links to the websites which are reachable from it?\n");
@@ -821,9 +814,7 @@ void menu1()
 			if (!ans) {
 				menu2(choice);
 			} else {
-				if (menu3()) {
-					return;
-				}
+				menu3();
 			}
 			break;
 		case 8:
