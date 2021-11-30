@@ -50,7 +50,7 @@ int is_a_website(char *website)
     {
         if (strcmp(websites[i], website) == 0)
         {
-            return 1;
+            return i + 1;
         }
     }
     return 0;
@@ -69,49 +69,84 @@ int checkAlreadyPresent(char **arr, char *target, int len)
     return 0;
 }
 
-int populateReachableWebsites(char *website, char **reachableWebsites, int current)
+int populateReachableWebsites(int *websitesList, char **reachableWebsites, int len, int current)
 {
+    // for (int i = 0; i < rows; i++)
+    // {
+    //     if (strcmp(websites[i], website) == 0)
+    //     {
+    //         for (int j = 0; j < columns; j++)
+    //         {
+    //             if (mat[i][j])
+    //             {
+    //                 if (!checkAlreadyPresent(reachableWebsites, websites[j], current))
+    //                 {
+    //                     reachableWebsites[current] = malloc((strlen(websites[j])) * sizeof(char));
+    //                     reachableWebsites[current] = websites[j];
+    //                     current++;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
     for (int i = 0; i < rows; i++)
     {
-        if (strcmp(websites[i], website) == 0)
+        for (int j = 0; j < len; j++)
         {
-            for (int j = 0; j < columns; j++)
+            if (!mat[websitesList[j]][i])
             {
-                if (mat[i][j])
-                {
-                    if (!checkAlreadyPresent(reachableWebsites, websites[j], current))
-                    {
-                        reachableWebsites[current] = malloc((strlen(websites[j])) * sizeof(char));
-                        reachableWebsites[current] = websites[j];
-                        current++;
-                    }
-                }
+                break;
+            }
+            if (j == len - 1)
+            {
+                reachableWebsites[current] = malloc((strlen(websites[i])) * sizeof(char));
+                reachableWebsites[current] = websites[i];
+                current++;
             }
         }
     }
+
     return current;
 }
 
-int populateReachableFromWebsites(char *website, char **reachableWebsites, int current)
+int populateReachableFromWebsites(int *websitesList, char **reachableWebsites, int len, int current)
 {
-    for (int i = 0; i < columns; i++)
+    // for (int i = 0; i < columns; i++)
+    // {
+    //     if (strcmp(websites[i], website) == 0)
+    //     {
+    //         for (int j = 0; j < rows; j++)
+    //         {
+    //             if (mat[j][i])
+    //             {
+    //                 if (!checkAlreadyPresent(reachableWebsites, websites[j], current))
+    //                 {
+    //                     reachableWebsites[current] = malloc((strlen(websites[j])) * sizeof(char));
+    //                     reachableWebsites[current] = websites[j];
+    //                     current++;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+    // return current;
+    for (int i = 0; i < rows; i++)
     {
-        if (strcmp(websites[i], website) == 0)
+        for (int j = 0; j < len; j++)
         {
-            for (int j = 0; j < rows; j++)
+            if (!mat[i][websitesList[j]])
             {
-                if (mat[j][i])
-                {
-                    if (!checkAlreadyPresent(reachableWebsites, websites[j], current))
-                    {
-                        reachableWebsites[current] = malloc((strlen(websites[j])) * sizeof(char));
-                        reachableWebsites[current] = websites[j];
-                        current++;
-                    }
-                }
+                break;
+            }
+            if (j == len - 1)
+            {
+                reachableWebsites[current] = malloc((strlen(websites[i])) * sizeof(char));
+                reachableWebsites[current] = websites[i];
+                current++;
             }
         }
     }
+
     return current;
 }
 
@@ -759,21 +794,25 @@ void menu4()
     break;
     case 6:
     {
-        char *website = malloc(1024 * sizeof(char));
+        char *website;
         printf("Enter the number of websites:");
         int x;
         scanf("%d", &x);
         getchar();
         char **reachableWebsites = malloc(rows * sizeof(char *));
         int current = 0;
+        int *enteredWebsites = malloc(rows * sizeof(int));
+        int counter = 0;
         for (int i = 0; i < x; i++)
         {
-            realloc(website, 1024 * sizeof(char));
+            website = malloc(1024 * sizeof(char));
             fgets(website, 1024, stdin);
             website[strcspn(website, "\n")] = 0;
-            if (is_a_website(website))
+            int res = is_a_website(website);
+            if (res != 0)
             {
-                current = populateReachableWebsites(website, reachableWebsites, current);
+                enteredWebsites[counter] = res - 1;
+                counter++;
             }
             else
             {
@@ -781,6 +820,8 @@ void menu4()
                 i--;
             }
         }
+
+        current = populateReachableWebsites(enteredWebsites, reachableWebsites, counter, current);
         printf("\nThe websites are:\n");
         for (int i = 0; i < current; i++)
         {
@@ -798,15 +839,19 @@ void menu4()
         scanf("%d", &x);
         getchar();
         char **reachableWebsites = malloc(rows * sizeof(char *));
+        int *enteredWebsites = malloc(rows * sizeof(int));
+        int counter = 0;
         int current = 0;
         for (int i = 0; i < x; i++)
         {
             realloc(website, 1024 * sizeof(char));
             fgets(website, 1024, stdin);
             website[strcspn(website, "\n")] = 0;
-            if (is_a_website(website))
+            int res = is_a_website(website);
+            if (res != 0)
             {
-                current = populateReachableFromWebsites(website, reachableWebsites, current);
+                enteredWebsites[counter] = res - 1;
+                counter++;
             }
             else
             {
@@ -814,6 +859,8 @@ void menu4()
                 i--;
             }
         }
+        current = populateReachableFromWebsites(enteredWebsites, reachableWebsites, counter, current);
+
         printf("\nThe websites are:\n");
         for (int i = 0; i < current; i++)
         {
