@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "visualiser.c"
+// #include "visualiser.c"
 
 char **websites;
 int **mat;
@@ -239,13 +239,77 @@ void handleCase1(char *websiteA, char *websiteB)
     {
         for (int j = 0; j < count; j++)
         {
-            if (!mat[i][j])
+            if (!mat[reachableFromAB[i]][reachableFromAB[j]])
             {
                 break;
             }
             if (j == count - 1)
             {
-                answer[answerCount] = i;
+                answer[answerCount] = reachableFromAB[i];
+                answerCount++;
+            }
+        }
+    }
+
+    if (answerCount == 0)
+    {
+        printf("\nNo such wesbites exist\n");
+    }
+    else
+    {
+        printf("\nThe following are the websites which satisfy the properties:\n");
+        for (int i = 0; i < answerCount; i++)
+        {
+            printf("%s\n", websites[answer[i]]);
+        }
+    }
+    return;
+}
+
+void handleCase2(char *websiteA, char *websiteB)
+{
+    int indexA = -1;
+    int indexB = -1;
+    for (int i = 0; i < rows; i++)
+    {
+        if (strcmp(websiteA, websites[i]) == 0)
+        {
+            indexA = i;
+        }
+        if (strcmp(websiteB, websites[i]) == 0)
+        {
+            indexB = i;
+        }
+        if (indexA != -1 && indexB != -1)
+        {
+            break;
+        }
+    }
+
+    int *reachableToAB = malloc(rows * sizeof(int));
+    int count = 0;
+    for (int i = 0; i < rows; i++)
+    {
+        if (mat[i][indexA] == 1 && mat[i][indexB] == 1)
+        {
+            reachableToAB[count] = i;
+            count++;
+        }
+    }
+
+    int *answer = malloc(rows * sizeof(int));
+    int answerCount = 0;
+    for (int i = 0; i < count; i++)
+    {
+        for (int j = 0; j < count; j++)
+        {
+            if (!mat[reachableToAB[j]][reachableToAB[i]])
+            {
+                break;
+            }
+            if (j == count - 1)
+            {
+                answer[answerCount] = reachableToAB[i];
                 answerCount++;
             }
         }
@@ -318,7 +382,7 @@ void menu2(int choice)
             copymat(newmat);
             reflexive_closure(newmat);
             tocsv(newmat);
-            plot("Output.csv");
+            // plot("Output.csv");
         }
         break;
         case 2:
@@ -327,7 +391,7 @@ void menu2(int choice)
             copymat(newmat);
             symmetric_closure(newmat);
             tocsv(newmat);
-            plot("Output.csv");
+            // plot("Output.csv");
         }
         break;
         case 3:
@@ -336,7 +400,7 @@ void menu2(int choice)
             copymat(newmat);
             transitive_closure(newmat);
             tocsv(newmat);
-            plot("Output.csv");
+            // plot("Output.csv");
         }
         break;
         case 7:
@@ -347,7 +411,7 @@ void menu2(int choice)
             symmetric_closure(newmat);
             transitive_closure(newmat);
             tocsv(newmat);
-            plot("Output.csv");
+            // plot("Output.csv");
         }
         }
     }
@@ -448,6 +512,29 @@ void menu5()
         }
         handleCase1(websiteA, websiteB);
     }
+    case 2:
+    {
+        printf("Enter both the websites:\n");
+        char *websiteA = malloc(1024 * sizeof(char));
+        char *websiteB = malloc(1024 * sizeof(char));
+        fgets(websiteA, 1024, stdin);
+        websiteA[strcspn(websiteA, "\n")] = 0;
+        while (!is_a_website(websiteA))
+        {
+            printf("Please enter a valid website\n");
+            fgets(websiteA, 1024, stdin);
+            websiteA[strcspn(websiteA, "\n")] = 0;
+        }
+        fgets(websiteB, 1024, stdin);
+        websiteB[strcspn(websiteB, "\n")] = 0;
+        while (!is_a_website(websiteB))
+        {
+            printf("Please enter a valid website\n");
+            fgets(websiteB, 1024, stdin);
+            websiteB[strcspn(websiteB, "\n")] = 0;
+        }
+        handleCase2(websiteA, websiteB);
+    }
     break;
     }
 }
@@ -475,7 +562,7 @@ void menu4()
         make_irreflexive(newmat);
         remove_transitivity(newmat);
         tocsv(newmat);
-        plot("Output.csv");
+        // plot("Output.csv");
     }
     break;
     case 2:
@@ -903,7 +990,6 @@ int main()
             }
         }
     }
-    printf(websites[0]);
     menu1();
 
     return 0;
