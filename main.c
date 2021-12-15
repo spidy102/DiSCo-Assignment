@@ -375,9 +375,9 @@ void menu5()
 		case 3: {
 			int res = handleCase3();
 			if (res) {
-				printf("\nYes\n");
+				printf("Yes\n");
 			} else {
-				printf("\nNo\n");
+				printf("No\n");
 			}
 		} break;
 		case 4: {
